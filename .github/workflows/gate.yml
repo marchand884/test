@@ -1,0 +1,13 @@
+name: gate
+on:
+  pull_request:
+  merge_group:
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: check FAIL marker
+        run: |
+          if [ -f FAIL ]; then echo "FAIL marker present"; exit 1; fi
+          echo "no FAIL marker, gate passes"
