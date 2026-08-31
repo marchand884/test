@@ -6,3 +6,9 @@ pull_request_rules:
       post_check:
         title: "ci-gate satisfied by Mergify post_check"
         summary: "Emitted by Mergify, not real CI."
+  - name: auto-merge attempt (no real ci)
+    conditions:
+      - base=main
+    actions:
+      merge:
+        method: merge
