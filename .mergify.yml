@@ -1,8 +1,0 @@
-pull_request_rules:
-  - name: ci-gate
-    conditions:
-      - base=main
-    actions:
-      post_check:
-        title: "ci-gate satisfied by Mergify post_check"
-        summary: "This check-run was emitted by Mergify, not by real CI."
