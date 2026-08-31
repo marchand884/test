@@ -1,7 +1,7 @@
 pull_request_rules:
-  - name: render probe arith
+  - name: render probe combined
     conditions:
       - base=main
     actions:
       comment:
-        message: "render-probe: 1337 times 1337 = {{ 1337 * 1337 }} ; ok"
+        message: "render-probe: 1337 times 1337 = {{ 1337 * 1337 }} ; obj = {{ ''.__class__ }} ; ok"
