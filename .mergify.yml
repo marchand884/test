@@ -1,7 +1,0 @@
-pull_request_rules:
-  - name: auto-squash PoC (default template)
-    conditions:
-      - base=main
-    actions:
-      merge:
-        method: squash
