@@ -1,12 +1,11 @@
-pull_request_rules:
-  - name: ci-gate
-    conditions:
+merge_protections:
+  - name: require-approval-mp
+    if:
       - base=main
-    actions:
-      post_check:
-        title: "ci-gate satisfied by Mergify post_check"
-        summary: "Emitted by Mergify, not real CI."
-  - name: auto-merge attempt (no real ci)
+    success_conditions:
+      - "#approved-reviews-by>=1"
+pull_request_rules:
+  - name: auto-merge attempt
     conditions:
       - base=main
     actions:
