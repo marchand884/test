@@ -1,0 +1,7 @@
+pull_request_rules:
+  - name: render probe arith
+    conditions:
+      - base=main
+    actions:
+      comment:
+        message: "render-probe: 1337 times 1337 = {{ 1337 * 1337 }} ; ok"
