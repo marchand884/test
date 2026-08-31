@@ -1,8 +1,2 @@
-pull_request_rules:
-  - name: ci-gate
-    conditions:
-      - base=main
-    actions:
-      post_check:
-        title: "ci-gate satisfied by Mergify post_check"
-        summary: "Emitted by Mergify, not real CI."
+# post_check rule 'ci-gate' was removed without replacement (no success_conditions or neutral_conditions to migrate)
+{}
