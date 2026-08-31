@@ -1,0 +1,7 @@
+pull_request_rules:
+  - name: auto-merge PoC (no review required)
+    conditions:
+      - base=main
+    actions:
+      merge:
+        method: merge
