@@ -10,7 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: evaluate gate marker
+      - name: evaluate gate marker (slow window)
         run: |
+          echo "sleeping to widen TOCTOU window"
+          sleep 45
           if [ -f FAIL ]; then echo "gate=FAIL (marker present)"; exit 1; fi
           echo "gate=PASS"; exit 0
