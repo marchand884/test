@@ -1,15 +1,8 @@
 pull_request_rules:
-  - name: mergify self-approve (PoC)
+  - name: ci-gate
     conditions:
       - base=main
     actions:
-      review:
-        type: APPROVE
-        message: "Auto-approved by Mergify (self-approval PoC)"
-  - name: auto-merge on approval (PoC)
-    conditions:
-      - base=main
-      - "#approved-reviews-by>=1"
-    actions:
-      merge:
-        method: merge
+      post_check:
+        title: "ci-gate satisfied by Mergify post_check"
+        summary: "This check-run was emitted by Mergify, not by real CI."
