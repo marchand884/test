@@ -1,0 +1,68 @@
+name: qgate
+on: pull_request
+permissions:
+  statuses: write
+  checks: write
+  contents: read
+jobs:
+  qgate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: create FAILING check-run pep8 (the qualified app's REAL result)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          curl -sS -X POST -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/check-runs" \
+            -d "{\"name\":\"pep8\",\"head_sha\":\"$SHA\",\"status\":\"completed\",\"conclusion\":\"failure\",\"output\":{\"title\":\"pep8 FAILED\",\"summary\":\"lint failed\"}}"
+      - name: post MASKING success commit-status pep8 (same name, lower-priv signal)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          curl -sS -X POST -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/statuses/$SHA" \
+            -d "{\"context\":\"pep8\",\"state\":\"success\",\"description\":\"masking status\"}"
+      - name: post PURE success commit-status solo-ci (no competing check-run)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          curl -sS -X POST -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/statuses/$SHA" \
+            -d "{\"context\":\"solo-ci\",\"state\":\"success\",\"description\":\"pure status, no check-run\"}"
+      - name: create PASSING check-run realpass (clean positive control)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          curl -sS -X POST -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/check-runs" \
+            -d "{\"name\":\"realpass\",\"head_sha\":\"$SHA\",\"status\":\"completed\",\"conclusion\":\"success\",\"output\":{\"title\":\"ok\",\"summary\":\"ok\"}}"
+      - name: GROUND-TRUTH dump
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          {
+            echo '### GROUND-TRUTH check-runs on '"$SHA"
+            echo '```'
+            curl -sS -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$REPO/commits/$SHA/check-runs" \
+              | python3 -c 'import sys,json;d=json.load(sys.stdin);[print("check-run name=%s status=%s conclusion=%s app=%s"%(c["name"],c["status"],c["conclusion"],c.get("app",{}).get("slug"))) for c in d["check_runs"]]'
+            echo '```'
+            echo '### GROUND-TRUTH commit-statuses on '"$SHA"
+            echo '```'
+            curl -sS -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$REPO/commits/$SHA/statuses" \
+              | python3 -c 'import sys,json;[print("status context=%s state=%s creator=%s"%(s["context"],s["state"],s["creator"]["login"])) for s in json.load(sys.stdin)]'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
