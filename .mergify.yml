@@ -1,8 +1,0 @@
-pull_request_rules:
-  - name: gate merge
-    conditions:
-      - base=main
-      - check-success=ci-gate
-    actions:
-      merge:
-        method: squash
