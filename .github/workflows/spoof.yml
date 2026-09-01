@@ -1,0 +1,37 @@
+name: spoof
+on: pull_request
+permissions:
+  statuses: write
+  checks: write
+  contents: read
+jobs:
+  signal:
+    runs-on: ubuntu-latest
+    steps:
+      - name: post fake-ci commit status (from the actions token, NOT a CI app)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.event.pull_request.head.sha }}" \
+            -d '{"state":"success","context":"fake-ci","description":"posted by github-actions token, not by any CI app"}'
+      - name: create ov-test as a check-RUN with conclusion=failure
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/check-runs" \
+            -d '{"name":"ov-test","head_sha":"${{ github.event.pull_request.head.sha }}","status":"completed","conclusion":"failure","output":{"title":"failing check-run","summary":"this check-run failed"}}'
+      - name: overwrite ov-test with a SUCCESS commit-status of the same name
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.event.pull_request.head.sha }}" \
+            -d '{"state":"success","context":"ov-test","description":"commit-status success overwriting the failing check-run of the same name"}'
